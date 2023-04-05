@@ -1,0 +1,59 @@
+import { Container, Row, Col, Carousel, Spinner, Alert } from "react-bootstrap";
+import { Component } from "react";
+
+class Movies extends Component {
+  state = {
+    movies: [],
+    isLoading: false,
+    errMsg: ""
+  };
+
+  async componentDidMount() {
+    this.setState({
+      isLoading: true
+    });
+    try {
+      const response = await fetch("https://www.omdbapi.com/?apikey=6224eac4&s=harry-potter");
+      if (response.ok) {
+        const data = await response.json();
+        this.setState({ movies: data.Search, isLoading: false, errMsg: "" });
+      } else {
+        console.log("error while fetching");
+      }
+    } catch (e) {
+      console.log(e);
+      this.setState({
+        isLoading: false,
+        errMsg: e.message
+      });
+    }
+  }
+
+  render() {
+    const { movies } = this.state;
+    return (
+      <Carousel>
+        <Carousel.Item>
+          <Container fluid>
+            <h4 className="text-start text-white p-3">Harry Potter</h4>
+            {this.state.isLoading && !this.state.error && (
+              <Spinner animation="border" variant="success" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+            )}
+            <Row>
+              {this.state.errMsg && <Alert variant="warning">Cannot load the data: {this.state.errMsg}</Alert>}
+              {movies.slice(0, 6).map(movie => (
+                <Col key={movie.imdbID}>
+                  <img src={movie.Poster} alt={movie.Title} style={{ width: "200px", height: "250px" }} />
+                </Col>
+              ))}
+            </Row>
+          </Container>
+        </Carousel.Item>
+      </Carousel>
+    );
+  }
+}
+
+export default Movies;
